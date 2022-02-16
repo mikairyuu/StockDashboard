@@ -1,0 +1,33 @@
+name: .NET
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+    
+  build:
+    runs-on: ubuntu-latest
+    env:
+      keylink:  ${{ secrets.KEYLINK }}
+      hostname: ${{ secrets.HOSTNAME }}
+      ssh_port: ${{ secrets.SSH_PORT }}
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet publish --no-restore --configuration Release
+      
+    - name: Download SSH key
+      run: wget -O k.key "$keylink";chmod 400 k.key
+    - name: Upload artifacts
+      run:  rsync -ratlz --rsh="ssh -i k.key -o StrictHostKeyChecking=no -l deploy -p $ssh_port" ./bin/Release/net6.0/publish/ deploy@$hostname:/home/deploy/app/
