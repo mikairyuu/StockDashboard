@@ -1,4 +1,4 @@
-namespace StockDashboard;
+namespace WebVezdekod;
 
 public class WeatherForecast
 {
