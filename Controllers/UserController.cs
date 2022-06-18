@@ -86,8 +86,8 @@ public class UserController : ControllerBase
         }
     }
     
-    [HttpGet("/getuser")]
-    public async Task<UserSummary> GetUser(string? token)
+    [HttpPost("/getuser")]
+    public async Task<UserSummary> GetUser([Bind("token")] TokenModel token)
     {
         NpgsqlConnection connection = null;
         try
@@ -96,7 +96,7 @@ public class UserController : ControllerBase
             {
                 await connection.OpenAsync();
                 var ans = await connection.QueryAsync<UserSummary>(@"select * from users where token = @token",
-                    new {@token = token});
+                    new {@token = token.token});
                 return ans.FirstOrDefault();
             }
         }
