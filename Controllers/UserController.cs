@@ -85,6 +85,30 @@ public class UserController : ControllerBase
             await connection?.CloseAsync();
         }
     }
+    
+    [HttpGet("/getuser")]
+    public async Task<UserSummary> GetUser(string? token)
+    {
+        NpgsqlConnection connection = null;
+        try
+        {
+            await using (connection = new NpgsqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+                var ans = await connection.QueryAsync<UserSummary>(@"select * from users where token = @token",
+                    new {@token = token});
+                return ans.FirstOrDefault();
+            }
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
+        finally
+        {
+            await connection?.CloseAsync();
+        }
+    }
 
 
     private KeyValuePair<string, string> GenerateHash(string s)
